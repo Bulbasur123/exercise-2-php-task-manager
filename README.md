@@ -4,12 +4,6 @@ A personal one-page task manager for **Exercise #2**, built with **PHP, HTML, CS
 
 **Repository:** https://github.com/Bulbasur123/exercise-2-php-task-manager
 
-## Preview
-
-| Desktop | Mobile |
-| --- | --- |
-| ![TaskFlow desktop preview](screenshots/desktop.png) | ![TaskFlow mobile preview](screenshots/mobile.png) |
-
 ## Features
 
 - Add tasks with a title, priority, and optional due date
@@ -76,11 +70,7 @@ exercise-2-php-task-manager/
 │   ├── avatar.jpg         ← profile photo in the header
 │   └── favicon.svg        ← browser tab icon
 ├── storage/
-│   ├── .gitkeep           ← keeps the folder in Git
 │   └── .htaccess          ← blocks direct web access to task data
-├── screenshots/
-│   ├── desktop.png
-│   └── mobile.png
 ├── .gitignore
 └── README.md
 ```
