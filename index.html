@@ -1,39 +1,3 @@
-<?php
-declare(strict_types=1);
-
-/*
- * TaskFlow page view — renders the initial board.
- * All task actions are handled by api.php.
- */
-
-require_once __DIR__ . '/includes/taskflow.php';
-
-$bootError = '';
-try {
-    $tasks = load_tasks();
-} catch (Throwable $exception) {
-    error_log('TaskFlow: ' . $exception->getMessage());
-    $tasks = [];
-    $bootError = 'Task storage is unavailable. Make sure the storage folder is writable.';
-}
-
-$stats = task_stats($tasks);
-
-$flashMessages = [
-    'added' => ['Task added.', 'success'],
-    'updated' => ['Task list updated.', 'success'],
-    'error' => ['That action could not be completed.', 'error'],
-    'expired' => ['Your session expired. Refresh the page and try again.', 'error'],
-];
-
-$flash = null;
-if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$_GET['flash']])) {
-    $flash = [
-        'message' => $flashMessages[$_GET['flash']][0],
-        'type' => $flashMessages[$_GET['flash']][1],
-    ];
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,7 +6,6 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
   <title>TaskFlow — Exercise #2</title>
   <meta name="description" content="TaskFlow is a personal one-page task manager built with PHP, HTML, CSS, and JavaScript for Exercise #2." />
   <meta name="theme-color" content="#123a2f" />
-  <meta name="csrf-token" content="<?= e($csrfToken) ?>" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -52,7 +15,7 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
 </head>
 <body>
   <header class="site-header container">
-    <a class="brand" href="index.php" aria-label="TaskFlow home">
+    <a class="brand" href="index.html" aria-label="TaskFlow home">
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
           <path d="m5 12 4 4L19 6" />
@@ -62,7 +25,7 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
     </a>
 
     <div class="header-meta">
-      <span class="today"><?= e(date('D, M j')) ?></span>
+      <span class="today" id="today-date">Today</span>
       <span class="exercise-pill">Personal Exercise #2</span>
       <a class="icon-link" href="https://github.com/Bulbasur123" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -76,17 +39,6 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
   </header>
 
   <main id="main">
-    <?php if ($bootError !== '' || $flash !== null): ?>
-      <div class="container flash-wrap">
-        <div class="flash <?= $bootError !== '' ? 'is-error' : 'is-' . e($flash['type']) ?>" role="alert">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M12 8v5M12 16.5v.1" />
-          </svg>
-          <span><?= e($bootError !== '' ? $bootError : $flash['message']) ?></span>
-        </div>
-      </div>
-    <?php endif; ?>
 
     <section class="hero container" aria-labelledby="hero-title">
       <div class="hero-copy">
@@ -115,17 +67,17 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
         </div>
 
         <div class="progress-wrap">
-          <div class="progress-ring" id="progress-ring" style="--progress: <?= (int) $stats['percent'] ?>%;" role="img" aria-label="<?= (int) $stats['percent'] ?>% of tasks complete">
+          <div class="progress-ring" id="progress-ring" style="--progress: 0%;" role="img" aria-label="Loading tasks">
             <div class="progress-inner">
-              <strong id="progress-value"><?= (int) $stats['percent'] ?>%</strong>
+              <strong id="progress-value">0%</strong>
               <span>complete</span>
             </div>
           </div>
           <div class="progress-copy">
-            <p><strong id="stat-total"><?= (int) $stats['total'] ?></strong> tasks on your board</p>
+            <p><strong id="stat-total">0</strong> tasks on your board</p>
             <div class="mini-stats">
-              <span><strong id="stat-active"><?= (int) $stats['active'] ?></strong> to do</span>
-              <span><strong id="stat-done"><?= (int) $stats['done'] ?></strong> done</span>
+              <span><strong id="stat-active">0</strong> to do</span>
+              <span><strong id="stat-done">0</strong> done</span>
             </div>
           </div>
         </div>
@@ -160,8 +112,7 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
           </div>
 
           <input type="hidden" name="action" value="add" />
-          <input type="hidden" name="csrf" value="<?= e($csrfToken) ?>" />
-          <button class="add-button" id="add-button" type="submit">
+          <button class="add-button" id="add-button" type="submit" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
             </svg>
@@ -176,16 +127,16 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
             <p class="panel-kicker">The list</p>
             <h2 id="tasks-title">Today's focus</h2>
           </div>
-          <button class="clear-button" id="clear-completed" type="button" <?= $stats['done'] === 0 ? 'disabled' : '' ?>>
+          <button class="clear-button" id="clear-completed" type="button" disabled>
             Clear done
           </button>
         </div>
 
         <div class="toolbar">
           <div class="filters" role="group" aria-label="Filter tasks">
-            <button class="filter is-active" type="button" aria-pressed="true" data-filter="all">All <span data-count="all"><?= (int) $stats['total'] ?></span></button>
-            <button class="filter" type="button" aria-pressed="false" data-filter="active">To do <span data-count="active"><?= (int) $stats['active'] ?></span></button>
-            <button class="filter" type="button" aria-pressed="false" data-filter="done">Done <span data-count="done"><?= (int) $stats['done'] ?></span></button>
+            <button class="filter is-active" type="button" aria-pressed="true" data-filter="all">All <span data-count="all">0</span></button>
+            <button class="filter" type="button" aria-pressed="false" data-filter="active">To do <span data-count="active">0</span></button>
+            <button class="filter" type="button" aria-pressed="false" data-filter="done">Done <span data-count="done">0</span></button>
           </div>
 
           <label class="search" for="search-tasks">
@@ -198,46 +149,12 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
         </div>
 
         <noscript>
-          <p class="noscript-note">JavaScript is off. You can view and add tasks, but checking off and deleting need JavaScript.</p>
+          <p class="noscript-note">JavaScript is required to load and update tasks in this app.</p>
         </noscript>
 
-        <ul class="task-list" id="task-list" aria-live="polite">
-          <?php foreach ($tasks as $task): ?>
-            <li class="task<?= $task['done'] ? ' is-done' : '' ?>" data-id="<?= e($task['id']) ?>">
-              <button class="task-check" type="button" role="checkbox" aria-checked="<?= $task['done'] ? 'true' : 'false' ?>" aria-label="<?= $task['done'] ? 'Mark as not done' : 'Mark as done' ?>: <?= e($task['title']) ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="m5 12 4 4L19 6" />
-                </svg>
-              </button>
+        <ul class="task-list" id="task-list" aria-live="polite" aria-busy="true"></ul>
 
-              <div class="task-copy">
-                <p class="task-title"><?= e($task['title']) ?></p>
-                <div class="task-meta">
-                  <span class="priority priority-<?= e($task['priority']) ?>">
-                    <span class="priority-dot"></span><?= e(ucfirst($task['priority'])) ?>
-                  </span>
-                  <?php if ($task['due'] !== null): ?>
-                    <span class="due<?= (!$task['done'] && $task['due'] < date('Y-m-d')) ? ' is-overdue' : '' ?>">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="4" y="5.5" width="16" height="15" rx="3" />
-                        <path d="M8 3.5v4M16 3.5v4M4 10h16" />
-                      </svg>
-                      <?= e(date('M j', strtotime($task['due']))) ?>
-                    </span>
-                  <?php endif; ?>
-                </div>
-              </div>
-
-              <button class="task-delete" type="button" aria-label="Delete task: <?= e($task['title']) ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M4 7h16M9 7V4.8c0-.5.4-.8.8-.8h4.4c.4 0 .8.3.8.8V7M6.5 7l.8 12.1c0 .5.4.9.9.9h7.6c.5 0 .9-.4.9-.9L17.5 7M10 11v5.5M14 11v5.5" />
-                </svg>
-              </button>
-            </li>
-          <?php endforeach; ?>
-        </ul>
-
-        <div class="empty-state" id="empty-state" <?= count($tasks) > 0 ? 'hidden' : '' ?>>
+        <div class="empty-state" id="empty-state" hidden>
           <div class="empty-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12.5 9 16l10-10" />
@@ -247,13 +164,7 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
           <p id="empty-text">Add your first task on the left and it will show up here.</p>
         </div>
 
-        <p class="list-footnote" id="list-footnote">
-          <?php if (count($tasks) > 0): ?>
-            Showing <?= count($tasks) ?> task<?= count($tasks) === 1 ? '' : 's' ?>. Changes save automatically.
-          <?php else: ?>
-            Nothing here yet. Add a task to get started.
-          <?php endif; ?>
-        </p>
+        <p class="list-footnote" id="list-footnote">Loading tasks…</p>
       </section>
     </section>
   </main>
@@ -275,10 +186,5 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
     <span class="toast-dot" aria-hidden="true"></span>
     <span id="toast-message"></span>
   </div>
-
-  <script type="application/json" id="initial-state"><?= json_encode(
-      ['tasks' => $tasks, 'stats' => $stats],
-      JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
-  ) ?></script>
 </body>
 </html>

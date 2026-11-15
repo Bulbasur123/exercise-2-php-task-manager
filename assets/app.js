@@ -25,18 +25,7 @@
       <path d="M8 3.5v4M16 3.5v4M4 10h16" />
     </svg>`;
 
-  const stateNode = document.getElementById("initial-state");
-  let initialState = { tasks: [], stats: { total: 0, done: 0, active: 0, percent: 0 } };
-
-  try {
-    if (stateNode && stateNode.textContent) {
-      initialState = JSON.parse(stateNode.textContent);
-    }
-  } catch (error) {
-    console.error("Could not read the initial task state.", error);
-  }
-
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
+  const todayNode = document.getElementById("today-date");
   const taskList = document.getElementById("task-list");
   const taskForm = document.getElementById("task-form");
   const titleInput = document.getElementById("task-title");
@@ -65,8 +54,9 @@
     done: document.querySelector('[data-count="done"]'),
   };
 
-  let tasks = Array.isArray(initialState.tasks) ? initialState.tasks : [];
-  let stats = initialState.stats || { total: 0, done: 0, active: 0, percent: 0 };
+  let csrfToken = "";
+  let tasks = [];
+  let stats = { total: 0, done: 0, active: 0, percent: 0 };
   let activeFilter = "all";
   let searchQuery = "";
   let toastTimer = null;
@@ -491,5 +481,53 @@
     }
   });
 
-  render();
+  async function loadInitialState() {
+    if (todayNode) {
+      todayNode.textContent = new Intl.DateTimeFormat(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }).format(new Date());
+    }
+
+    try {
+      const response = await fetch("api.php", {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        throw new Error("The server returned an unexpected response.");
+      }
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Could not load the task board.");
+      }
+
+      csrfToken = typeof data.csrf_token === "string" ? data.csrf_token : "";
+      tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      stats = data.stats || { total: 0, done: 0, active: 0, percent: 0 };
+
+      if (addButton && csrfToken !== "") {
+        addButton.disabled = false;
+      }
+
+      render();
+      taskList?.setAttribute("aria-busy", "false");
+    } catch (error) {
+      if (emptyState) {
+        emptyState.hidden = true;
+      }
+      if (listFootnote) {
+        listFootnote.textContent = "Could not load tasks. Refresh the page to try again.";
+      }
+      taskList?.setAttribute("aria-busy", "false");
+      showToast(errorMessage(error), "error");
+    }
+  }
+
+  loadInitialState();
 })();

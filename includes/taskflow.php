@@ -230,7 +230,7 @@ function wants_json(): bool
 
 function redirect_to(string $query = ''): void
 {
-    header('Location: index.php' . ($query !== '' ? '?' . $query : ''));
+    header('Location: index.html' . ($query !== '' ? '?' . $query : ''));
     exit;
 }
 

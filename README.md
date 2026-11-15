@@ -56,7 +56,7 @@ No PHP installed? Download a portable Windows build from [windows.php.net/downlo
 
 ## How it works
 
-`index.php` renders the page and its initial task state. `api.php` handles the POST actions used by the frontend, while shared storage, validation, and session helpers live in `includes/taskflow.php`. The browser sends JSON requests with an `X-CSRF-Token` header, and PHP responds with the updated task list and stats. The page updates without reloading.
+`index.html` is a static page with no PHP inside it. On load, `assets/app.js` requests the current tasks, stats, and CSRF token from `api.php` (GET). `api.php` also handles the POST actions used by the frontend, while shared storage, validation, and session helpers live in `includes/taskflow.php`. The browser sends JSON requests with an `X-CSRF-Token` header, and PHP responds with the updated task list and stats. The page updates without reloading.
 
 Tasks are stored in `storage/tasks.php`. The first line of that file is a PHP guard (`<?php exit; ?>`), so requesting the file over HTTP returns nothing. PHP strips the guard when reading, then rewrites the JSON after every change. The storage file is ignored by Git because it is runtime data.
 
@@ -66,12 +66,12 @@ The first time the app runs, it creates a few sample tasks. To reset the board, 
 
 ```
 exercise-2-php-task-manager/
-├── index.php              ← page view and initial task state
-├── api.php                ← JSON endpoint for add / toggle / delete / clear
+├── index.html             ← static page shell
+├── api.php                ← JSON bootstrap (GET) and task actions (POST)
 ├── includes/
 │   └── taskflow.php       ← storage, validation, session, and CSRF helpers
 ├── assets/
-│   ├── app.js             ← add / toggle / delete / filter / search
+│   ├── app.js             ← loads initial state and handles interactions
 │   ├── styles.css         ← responsive visual design
 │   ├── avatar.jpg         ← profile photo in the header
 │   └── favicon.svg        ← browser tab icon
@@ -88,6 +88,7 @@ exercise-2-php-task-manager/
 ## Notes
 
 - `storage/tasks.php` is created automatically and is **not** committed — each checkout starts with a fresh demo board.
+- The page is static HTML; JavaScript is required to load and update the board.
 - The app is designed for a single shared task list, which fits this exercise. For a real multi-user product, add user accounts and a database.
 - Replace `assets/avatar.jpg` if you want a different header photo.
 

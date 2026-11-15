@@ -4,12 +4,27 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/taskflow.php';
 
 /*
- * TaskFlow API — POST endpoint for add, toggle, delete, and clear actions.
- * The page itself lives in index.php.
+ * TaskFlow API — GET returns the current board for the page;
+ * POST handles add, toggle, delete, and clear actions.
  */
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+    try {
+        $tasks = load_tasks();
+        json_response([
+            'ok' => true,
+            'tasks' => $tasks,
+            'stats' => task_stats($tasks),
+            'csrf_token' => $csrfToken,
+        ]);
+    } catch (Throwable $exception) {
+        error_log('TaskFlow: ' . $exception->getMessage());
+        json_response(['ok' => false, 'error' => 'Task storage is unavailable. Please try again.'], 500);
+    }
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-    header('Allow: POST');
+    header('Allow: GET, POST');
     json_response(['ok' => false, 'error' => 'Method not allowed.'], 405);
 }
 
