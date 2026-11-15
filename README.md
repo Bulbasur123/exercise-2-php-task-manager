@@ -1,6 +1,6 @@
 # TaskFlow — Exercise #2
 
-A one-page task manager for **Group Exercise #2**, built with **PHP, HTML, CSS, and JavaScript**. No framework, no database, and no build step — just a small server-side app that keeps its task list in a JSON file.
+A personal one-page task manager for **Exercise #2**, built with **PHP, HTML, CSS, and JavaScript**. No framework, no database, and no build step — just a small server-side app that keeps its task list in a JSON file.
 
 **Repository:** https://github.com/Bulbasur123/exercise-2-php-task-manager
 
