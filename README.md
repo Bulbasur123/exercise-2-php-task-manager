@@ -56,7 +56,7 @@ No PHP installed? Download a portable Windows build from [windows.php.net/downlo
 
 ## How it works
 
-`index.php` renders the page and also handles the POST actions used by the frontend. The browser sends JSON requests with an `X-CSRF-Token` header, and PHP responds with the updated task list and stats. The page updates without reloading.
+`index.php` renders the page and its initial task state. `api.php` handles the POST actions used by the frontend, while shared storage, validation, and session helpers live in `includes/taskflow.php`. The browser sends JSON requests with an `X-CSRF-Token` header, and PHP responds with the updated task list and stats. The page updates without reloading.
 
 Tasks are stored in `storage/tasks.php`. The first line of that file is a PHP guard (`<?php exit; ?>`), so requesting the file over HTTP returns nothing. PHP strips the guard when reading, then rewrites the JSON after every change. The storage file is ignored by Git because it is runtime data.
 
@@ -66,7 +66,10 @@ The first time the app runs, it creates a few sample tasks. To reset the board, 
 
 ```
 exercise-2-php-task-manager/
-├── index.php              ← page, request handling, storage helpers
+├── index.php              ← page view and initial task state
+├── api.php                ← JSON endpoint for add / toggle / delete / clear
+├── includes/
+│   └── taskflow.php       ← storage, validation, session, and CSRF helpers
 ├── assets/
 │   ├── app.js             ← add / toggle / delete / filter / search
 │   ├── styles.css         ← responsive visual design

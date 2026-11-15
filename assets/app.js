@@ -324,7 +324,7 @@
   }
 
   async function sendAction(action, payload = {}) {
-    const response = await fetch("index.php", {
+    const response = await fetch("api.php", {
       method: "POST",
       headers: {
         "Accept": "application/json",
