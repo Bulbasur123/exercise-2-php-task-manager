@@ -35,13 +35,7 @@ A personal one-page task manager for **Exercise #2**, built with **PHP, HTML, CS
 
 ## Run it
 
-### Option 1 — XAMPP
-
-1. Copy this folder into your XAMPP `htdocs` folder.
-2. Start **Apache** in the XAMPP Control Panel.
-3. Open `http://localhost/exercise-2-php-task-manager/` in your browser.
-
-### Option 2 — PHP built-in server
+### Option 1 — PHP built-in server (no XAMPP needed)
 
 ```bash
 cd exercise-2-php-task-manager
@@ -49,6 +43,14 @@ php -S localhost:8000
 ```
 
 Then open `http://localhost:8000/`.
+
+No PHP installed? Download a portable Windows build from [windows.php.net/download](https://windows.php.net/download/), extract it, and use its `php.exe` for the command above. XAMPP is **not** required.
+
+### Option 2 — XAMPP (optional)
+
+1. Copy this folder into your XAMPP `htdocs` folder.
+2. Start **Apache** in the XAMPP Control Panel.
+3. Open `http://localhost/exercise-2-php-task-manager/` in your browser.
 
 **Requirements:** PHP 7.4 or newer with the standard JSON and session support. No database setup is required.
 
