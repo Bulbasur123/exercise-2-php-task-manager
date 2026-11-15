@@ -1,0 +1,11 @@
+# Runtime task data — created automatically by the app.
+storage/tasks.php
+
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor settings
+.vscode/
+.idea/
