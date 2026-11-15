@@ -323,14 +323,6 @@ img {
   letter-spacing: 0.1em;
 }
 
-.hero-note {
-  margin: 18px 0 0;
-  color: var(--ink-soft);
-  font-size: 0.79rem;
-  line-height: 1.72;
-  text-align: right;
-}
-
 /* Dashboard --------------------------------------------------------------- */
 
 .dashboard {
@@ -1180,12 +1172,6 @@ img {
 
   .tech-stack {
     justify-content: flex-start;
-  }
-
-  .hero-note {
-    max-width: 440px;
-    margin-top: 13px;
-    text-align: left;
   }
 
   .summary-panel {

@@ -502,9 +502,6 @@ if (isset($_GET['flash']) && is_string($_GET['flash']) && isset($flashMessages[$
           <span>CSS</span>
           <span>JS</span>
         </div>
-        <p class="hero-note">
-          No frameworks. No database. Just a hand-rolled JSON store and a clean little interface.
-        </p>
       </div>
     </section>
 
